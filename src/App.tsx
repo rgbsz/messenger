@@ -1,19 +1,25 @@
-import React, { useEffect } from "react"
-import firebase from "./firebase"
+import React from "react"
+import { BrowserRouter, Route } from "react-router-dom"
+import { createGlobalStyle } from "styled-components"
+
+import Chats from "./components/Chats"
+
+const GLOBAL_STYLE = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,700;1,400&subset=latin-ext&display=swap');
+  * {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif!important;
+  }
+`
 
 function App() {
-  useEffect(() => {
-    const query = async () => {
-      const db = firebase.firestore()
-      const data = await db
-        .collection("users")
-        .where("firstname", "==", "Rafał")
-        .get()
-      const users = data.forEach((user: any) => console.log(user.data()))
-    }
-    query()
-  }, [])
-  return <>Hello world</>
+  return (
+    <BrowserRouter>
+      <GLOBAL_STYLE />
+      <Route exact path='/chats/:id' component={Chats} />
+    </BrowserRouter>
+  )
 }
 
 export default App
