@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react"
 import styled from "styled-components"
+import history from "../history"
 
 import LeftPanel from "./Chats/LeftPanel"
 
 const Chats: React.FC = () => {
   const [chat, setChat] = useState<any>(null)
+  useEffect(() => {
+    if (!localStorage.getItem("uid")) history.push("/sign-in")
+  }, [])
   return (
     <Wrapper>
       <Container>
         <LeftPanel setChatFunction={(e: any) => setChat(e)} />
         <Messages>
-          <Message own={true}>Hejka</Message>
-          <Message own={false}>Hejka</Message>
-          <Message own={true}>Hejka</Message>
-          <Message own={false}>Hejka</Message>
+          {chat?.messages.map((message: any) => (
+            <Message own={true}>{message.content}</Message>
+          ))}
         </Messages>
       </Container>
     </Wrapper>

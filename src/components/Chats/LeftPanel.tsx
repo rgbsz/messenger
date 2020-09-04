@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import styled from "styled-components"
-
+import history from "../../history"
 import firebase from "../../firebase"
 
 import PlusIcon from "../../img/PlusIcon"
@@ -15,7 +15,7 @@ const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
   const db = firebase.firestore()
   useEffect(() => {
     db.collection("chats")
-      .where("users", "array-contains", "wnvZnnooTs0YWPEcE1Hf")
+      .where("users", "array-contains", localStorage.getItem("uid"))
       .onSnapshot(snapshot => {
         let snapshotChats: any = []
         let snapshotUsers: any = []
@@ -23,7 +23,7 @@ const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
           let snapshotUser: any = []
           item.data().users.forEach((user: any) => {
             if (!snapshotUsers.includes(user)) snapshotUsers.push(user)
-            if (user !== "wnvZnnooTs0YWPEcE1Hf") snapshotUser.push(user)
+            if (user !== localStorage.getItem("uid")) snapshotUser.push(user)
           })
 
           snapshotChats.push({
@@ -64,7 +64,12 @@ const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
-        <HeaderCreateChatButton>
+        <HeaderCreateChatButton
+          onClick={() => {
+            localStorage.removeItem("uid")
+            history.push("/sign-in")
+          }}
+        >
           <div>
             <PlusIcon />
           </div>

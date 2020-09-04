@@ -1,7 +1,9 @@
 import React from "react"
-import { BrowserRouter, Route } from "react-router-dom"
+import { Router as BrowserRouter, Route } from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
+import history from "./history"
 
+import SignIn from "./components/SignIn"
 import Chats from "./components/Chats"
 
 const GLOBAL_STYLE = createGlobalStyle`
@@ -15,9 +17,14 @@ const GLOBAL_STYLE = createGlobalStyle`
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter history={history}>
       <GLOBAL_STYLE />
-      <Route exact path='/chats/:id' component={Chats} />
+      <Route
+        exact
+        path='/sign-in'
+        component={localStorage.getItem("uid") ? Chats : SignIn}
+      />
+      <Route exact path='/chat' component={Chats} />
     </BrowserRouter>
   )
 }
