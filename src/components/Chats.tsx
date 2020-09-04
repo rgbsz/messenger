@@ -1,87 +1,77 @@
 import React, { useState, useEffect } from "react"
 import styled from "styled-components"
-import firebase from "../firebase"
 
-const Chats: React.FC<{ location: { pathname: string } }> = ({ location }) => {
-  const [chats, setChats] = useState<any>([])
+import LeftPanel from "./Chats/LeftPanel"
+
+const Chats: React.FC = () => {
   const [chat, setChat] = useState<any>(null)
-  const db = firebase.firestore()
-  useEffect(() => {
-    db.collection("chats")
-      .where("users", "array-contains", "rgbsz")
-      .onSnapshot((snapshot: any) => {
-        let snapshotChats: any = []
-        snapshot.forEach((item: any) =>
-          snapshotChats.push({ id: item.id, ...item.data() })
-        )
-        setChats(snapshotChats)
-      })
-  }, [])
   return (
-    <Container>
-      <ChatsPanel>
-        {chats.map((chat: any, i: number) => (
-          <div onClick={() => setChat([i])} key={chat.name}>
-            <p>{chat.name}</p>
-            <span>{chat.messages[chat.messages.length - 1].content}</span>
-          </div>
-        ))}
-      </ChatsPanel>
-      <Messages>
-        {chat &&
-          chats[chat].messages.map((message: any) => (
-            <Message own={message.author === "rgbsz" ? true : false}>
-              <span>{message.author}</span>
-              <p>{message.content}</p>
-            </Message>
-          ))}
-      </Messages>
-    </Container>
+    <Wrapper>
+      <Container>
+        <LeftPanel setChatFunction={(e: any) => setChat(e)} />
+        <Messages>
+          <Message own={true}>Hejka</Message>
+          <Message own={false}>Hejka</Message>
+          <Message own={true}>Hejka</Message>
+          <Message own={false}>Hejka</Message>
+        </Messages>
+      </Container>
+    </Wrapper>
   )
 }
 
-const Container = styled.div`
+const Wrapper = styled.div`
   width: 100%;
   height: 100vh;
+  background: ${props => props.theme.colors.primary};
+  padding: 2rem;
+  position: relative;
+  box-sizing: border-box;
+`
+
+const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  background: ${props => props.theme.colors.light};
+  border-radius: 2rem;
+  position: relative;
+  z-index: 0;
   display: flex;
 `
 
-const ChatsPanel = styled.div`
-  width: 15rem;
-  padding: 0 1rem;
-  div {
-    border-radius: 0.3rem;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 1rem;
-    background: #f2f2f2;
-    margin: 1rem 0;
-    cursor: pointer;
-    p {
-      font-weight: bold;
-    }
-    span {
-      color: #cccccc;
-    }
-  }
-`
-
 const Messages = styled.div`
+  overflow-y: scroll;
   flex: 1;
-  padding: 0.5rem 1rem 1rem 0;
+  padding: 1.5rem 2rem 2rem 1rem;
   display: flex;
   flex-direction: column;
 `
 
 const Message = styled.div<{ own: boolean }>`
-  background: ${props => (props.own ? "#303030" : "#f2f2f2")};
+  background: ${props => (props.own ? props.theme.colors.secondary : "white")};
   color: ${props => (props.own ? "white" : "black")};
   padding: 1rem;
-  border-radius: 0.3rem;
+  border-radius: ${props =>
+    props.own ? "2rem 2rem 0 2rem" : "2rem 2rem 2rem 0"};
   margin: 0.5rem 0;
   max-width: 50%;
   align-self: ${props => (props.own ? "flex-end" : "flex-start")};
   box-sizing: border-box;
+  position: relative;
+  z-index: 0;
+  &::before {
+    display: ${props => (props.own ? "none" : "block")};
+    border-radius: inherit;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    opacity: 0.2;
+    box-shadow: 0 0 1rem ${props => props.theme.colors.primary};
+    z-index: -1;
+  }
 `
 
 export default Chats

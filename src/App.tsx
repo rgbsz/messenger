@@ -5,11 +5,11 @@ import { createGlobalStyle } from "styled-components"
 import Chats from "./components/Chats"
 
 const GLOBAL_STYLE = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,700;1,400&subset=latin-ext&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;1,700&display=swap');
   * {
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif!important;
+    font-family: 'Ubuntu', sans-serif!important;
   }
 `
 
