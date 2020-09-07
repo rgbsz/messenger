@@ -1,9 +1,12 @@
 import React, { useContext, useState } from "react"
 import styled from "styled-components"
-import { AuthContext } from "../../auth"
 import firebase from "../../firebase"
 
-const CenterPanel: React.FC<{ chat: any }> = ({ chat }) => {
+import { AuthContext } from "../../Auth/auth"
+
+import { chatTypes, chatMessageTypes } from "../../global.types"
+
+const CenterPanel: React.FC<{ chat: chatTypes }> = ({ chat }) => {
   const { fullname } = useContext(AuthContext)
   const [lineBreaks, setLineBreaks] = useState<number>(0)
   const [messageContent, setMessageContent] = useState<string>("")
@@ -28,15 +31,17 @@ const CenterPanel: React.FC<{ chat: any }> = ({ chat }) => {
   return (
     <Wrapper>
       <Messages>
-        {chat?.messages.map((message: any) => (
-          <Message own={message.author === fullname ? true : false}>
-            {message.content}
-          </Message>
-        ))}
+        {chat?.messages.map(
+          ({ author, content }: chatMessageTypes, i: number) => (
+            <Message own={author === fullname ? true : false} key={i}>
+              {content}
+            </Message>
+          )
+        )}
       </Messages>
       <Controls>
         <textarea
-          onKeyPress={(e: any) => HandleTextArea(e)}
+          onKeyPress={e => HandleTextArea(e)}
           rows={lineBreaks + 1}
           onInput={(e: any) => {
             setLineBreaks((e.target.value.match(/\n/g) || []).length)

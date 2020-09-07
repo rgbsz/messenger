@@ -1,20 +1,14 @@
-import React, { useEffect, useState, useContext } from "react"
-import {
-  Router as BrowserRouter,
-  Route,
-  RouteProps,
-  Redirect,
-} from "react-router-dom"
+import React, { useContext } from "react"
+import { Router as BrowserRouter, Route, Redirect } from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
 import history from "./history"
-import firebase from "./firebase"
-import { AuthContext } from "./auth"
-import SignIn from "./pages/SignIn"
-import Chats from "./pages/Chats"
-import AuthProvider from "./auth"
+import { AuthContext } from "./Auth/auth"
+import SignIn from "./SignIn/SignIn"
+import Chats from "./Chat/Chat"
+import AuthProvider from "./Auth/auth"
+import { RouteTypes } from "./App.types"
 
 const GLOBAL_STYLE = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;1,700&display=swap');
   * {
     margin: 0;
     padding: 0;
@@ -22,7 +16,7 @@ const GLOBAL_STYLE = createGlobalStyle`
   }
 `
 
-const UnprotectedRoute = ({ component: Component, ...rest }: any) => {
+const UnprotectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
   const { uid } = useContext(AuthContext)
   return (
     <Route
@@ -35,7 +29,7 @@ const UnprotectedRoute = ({ component: Component, ...rest }: any) => {
   )
 }
 
-const ProtectedRoute = ({ component: Component, ...rest }: any) => {
+const ProtectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
   const { uid } = useContext(AuthContext)
   return (
     <Route

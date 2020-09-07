@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useContext } from "react"
+import React from "react"
 import styled from "styled-components"
-import history from "../../history"
 import firebase from "../../firebase"
 
 import PlusIcon from "../../img/PlusIcon"
-import { AuthContext } from "../../auth"
+import { chatTypes } from "../../global.types"
 
 const LeftPanel: React.FC<{
-  setChatFunction: (e: any) => void
   chatIndex: number
-  chats: any
-  setChatIndexFunction: (e: any) => void
-}> = ({ setChatFunction, chatIndex, chats, setChatIndexFunction }) => {
+  chats: chatTypes[]
+  setChatIndexFunction: (e: number) => void
+}> = ({ chatIndex, chats, setChatIndexFunction }) => {
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
@@ -24,11 +22,10 @@ const LeftPanel: React.FC<{
         <SearchBar type='text' placeholder='Search...' />
       </Header>
       <Chats>
-        {chats.map((chat: any, i: number) => (
+        {chats.map((chat: chatTypes, i: number) => (
           <Chat
             activeChat={chatIndex}
             onClick={() => {
-              setChatFunction(chats[i])
               setChatIndexFunction(i + 1)
             }}
             key={i}
@@ -41,7 +38,7 @@ const LeftPanel: React.FC<{
                   ? chat.messages[0].content.length > 25
                     ? chat.messages[0].content.substr(0, 22) + "..."
                     : chat.messages[0].content
-                  : "Przywitaj się!"}
+                  : "Przywitajsię!"}
               </ChatLastMessage>
             </ChatInfo>
           </Chat>

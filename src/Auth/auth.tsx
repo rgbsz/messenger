@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react"
-import { User } from "firebase"
-import firebase from "./firebase"
+import firebase from "../firebase"
 
-export const AuthContext = React.createContext<{
-  uid: string | null
-  fullname: string | null
-}>({ uid: null, fullname: null })
+import { userContextTypes } from "./auth.types"
+
+export const AuthContext = React.createContext<userContextTypes>({
+  uid: null,
+  fullname: null,
+})
 
 const AuthProvider: React.FC = ({ children }) => {
-  const [user, setUser] = useState<{
-    uid: null | string
-    fullname: null | string
-  }>({ uid: null, fullname: null })
+  const [user, setUser] = useState<userContextTypes>({
+    uid: null,
+    fullname: null,
+  })
   useEffect(() => {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {

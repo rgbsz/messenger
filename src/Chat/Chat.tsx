@@ -2,16 +2,17 @@ import React, { useState, useEffect, useContext } from "react"
 import styled from "styled-components"
 import firebase from "../firebase"
 
-import LeftPanel from "../components/Chats/LeftPanel"
-import { AuthContext } from "../auth"
-import CenterPanel from "../components/Chats/CenterPanel"
+import { AuthContext } from "../Auth/auth"
+
+import LeftPanel from "./components/LeftPanel"
+import CenterPanel from "./components/CenterPanel"
+
+import { chatUserTypes, chatTypes } from "../global.types"
 
 const Chats: React.FC = () => {
   const { uid, fullname } = useContext(AuthContext)
-
-  const [chat, setChat] = useState<any>(null)
-  const [chats, setChats] = useState<any>([])
-  const [chatIndex, setChatIndex] = useState<any>(1)
+  const [chats, setChats] = useState<chatTypes[]>([])
+  const [chatIndex, setChatIndex] = useState<number>(1)
 
   useEffect(() => {
     firebase
@@ -19,10 +20,12 @@ const Chats: React.FC = () => {
       .collection("chats")
       .where("users", "array-contains", { uid, fullname })
       .onSnapshot(snapshot => {
-        let snapshotChats: any = []
+        let snapshotChats: chatTypes[] = []
         snapshot.forEach(chat => {
           let snapshotChat = {
-            user: chat.data().users.filter((user: any) => user.uid !== uid)[0],
+            user: chat
+              .data()
+              .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
             messages: chat.data().messages,
             id: chat.data().id,
           }
@@ -34,15 +37,13 @@ const Chats: React.FC = () => {
   useEffect(() => {
     if (!chatIndex && chats) {
       setChatIndex(1)
-      setChat(chats[0])
     }
   }, [chats, chatIndex])
   return (
     <Wrapper>
       <Container>
         <LeftPanel
-          setChatFunction={(e: any) => setChat(e)}
-          setChatIndexFunction={(e: any) => setChatIndex(e)}
+          setChatIndexFunction={(e: number) => setChatIndex(e)}
           chatIndex={chatIndex}
           chats={chats}
         />
