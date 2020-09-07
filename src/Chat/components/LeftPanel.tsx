@@ -179,8 +179,7 @@ const Chat = styled.div<{ activeChat: number | null }>`
 const ChatImg = styled.div`
   min-width: 3rem;
   min-height: 3rem;
-  background: url("https://www.commondreams.org/sites/default/files/views-article/elonmusk.jpeg");
-  background-position: center;
+  background: url("https://www.commondreams.org/sites/default/files/views-article/elonmusk.jpeg") center;
   background-size: cover;
   border-radius: 50%;
 `

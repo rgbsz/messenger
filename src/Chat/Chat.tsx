@@ -10,13 +10,14 @@ import CenterPanel from "./components/CenterPanel"
 import { chatUserTypes, chatTypes } from "../global.types"
 import {REQUEST_STATUS} from "../global.consts"
 import LoadingScreen from "../LoadingScreen"
+import CreateChat from "./components/CreateChat"
 
 const Chats: React.FC = () => {
     const { uid, fullname } = useContext(AuthContext)
     const [chats, setChats] = useState<chatTypes[]>([])
     const [chatIndex, setChatIndex] = useState<number>(1)
     const [requestStatus, setRequestStatus] = useState<REQUEST_STATUS>(REQUEST_STATUS.NONE)
-
+    const [createChatStatus, setCreateChatStatus] = useState<boolean>(false)
     useEffect(() => {
         firebase
             .firestore()
@@ -46,7 +47,7 @@ const Chats: React.FC = () => {
     if(requestStatus !== REQUEST_STATUS.NONE && requestStatus !== REQUEST_STATUS.PENDING) {
         return (
             <Wrapper>
-                <Container>
+                <Container filter={createChatStatus}>
                     <LeftPanel
                         setChatIndexFunction={(e: number) => setChatIndex(e)}
                         chatIndex={chatIndex}
@@ -54,6 +55,7 @@ const Chats: React.FC = () => {
                     />
                     <CenterPanel chat={chats[chatIndex - 1]} />
                 </Container>
+                <CreateChat visible={createChatStatus}/>
             </Wrapper>
         )
     }
@@ -71,7 +73,7 @@ const Wrapper = styled.div`
   box-sizing: border-box;
 `
 
-const Container = styled.div`
+const Container = styled.div<{ filter: boolean }>`
   width: 100%;
   height: 100%;
   background: ${props => props.theme.colors.light};
@@ -79,6 +81,7 @@ const Container = styled.div`
   position: relative;
   z-index: 0;
   display: flex;
+  filter: blur(${({ filter }) => filter ? '.3rem' : '0'});
 `
 
 export default Chats

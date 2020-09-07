@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import { Router as BrowserRouter, Route, Redirect } from "react-router-dom"
+import {Router as BrowserRouter, Route, Redirect, Switch} from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
 import history from "./history"
 import { AuthContext } from "./Auth/auth"
@@ -9,6 +9,7 @@ import AuthProvider from "./Auth/auth"
 import { RouteTypes } from "./App.types"
 import {REQUEST_STATUS} from "./global.consts"
 import LoadingScreen from "./LoadingScreen"
+import SignUp from "./SignUp/SignUp"
 
 const GLOBAL_STYLE = createGlobalStyle`
   * {
@@ -51,8 +52,12 @@ function App() {
         <AuthProvider>
             <BrowserRouter history={history}>
                 <GLOBAL_STYLE />
-                <UnprotectedRoute exact path='/sign-in' component={SignIn} />
-                <ProtectedRoute exact path='/chat' component={Chats} />
+                <Switch>
+                    <UnprotectedRoute exact path='/sign-in' component={SignIn} />
+                    <UnprotectedRoute exact path='/sign-up' component={SignUp} />
+                    <ProtectedRoute exact path='/chat' component={Chats} />
+                    <Route render={() => <Redirect to={'/sign-in'}/>}/>
+                </Switch>
             </BrowserRouter>
         </AuthProvider>
     )

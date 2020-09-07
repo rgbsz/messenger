@@ -10,7 +10,7 @@ const SignIn: React.FC = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (email && password)
-      firebase.auth().signInWithEmailAndPassword(email, password)
+      firebase.auth().signInWithEmailAndPassword(email, password).then(() => console.log('logged in')).catch(() => console.log('error'))
   }
   return (
     <Wrapper>
