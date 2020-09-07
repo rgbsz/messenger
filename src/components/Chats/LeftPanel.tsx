@@ -1,75 +1,21 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import styled from "styled-components"
 import history from "../../history"
 import firebase from "../../firebase"
 
 import PlusIcon from "../../img/PlusIcon"
+import { AuthContext } from "../../auth"
 
-const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
-  setChatFunction,
-}) => {
-  const [chatIndex, setChatIndex] = useState<any>(null)
-  const [chats, setChats] = useState<any>([])
-  const [userIndexes, setUserIndexes] = useState<any>([])
-  const [users, setUsers] = useState<any>([])
-  const db = firebase.firestore()
-  useEffect(() => {
-    db.collection("chats")
-      .where("users", "array-contains", localStorage.getItem("uid"))
-      .onSnapshot(snapshot => {
-        let snapshotChats: any = []
-        let snapshotUsers: any = []
-        snapshot.forEach((item: any) => {
-          let snapshotUser: any = []
-          item.data().users.forEach((user: any) => {
-            if (!snapshotUsers.includes(user)) snapshotUsers.push(user)
-            if (user !== localStorage.getItem("uid")) snapshotUser.push(user)
-          })
-
-          snapshotChats.push({
-            id: item.id,
-            messages: item.data().messages,
-            user: snapshotUser[0],
-          })
-        })
-        setChats(snapshotChats)
-        setUserIndexes(snapshotUsers)
-        if (!chatIndex && snapshotChats) setChatIndex(1)
-      })
-  }, [])
-  useEffect(() => {
-    if (userIndexes.length > 0) {
-      db.collection("users")
-        .where("id", "in", userIndexes)
-        .onSnapshot(snapshot => {
-          let snapshotUsers: any = []
-          snapshot.forEach((item: any) => {
-            console.log(item.data())
-            snapshotUsers.push({
-              id: item.data().id,
-              displayname: item.data().displayname,
-            })
-          })
-          setUsers(snapshotUsers)
-        })
-    }
-  }, [userIndexes.length])
-  const getUserName = (id: string) => {
-    let userName
-    users.forEach((item: any) => {
-      if (item.id === id) userName = item.displayname
-    })
-    return userName
-  }
+const LeftPanel: React.FC<{
+  setChatFunction: (e: any) => void
+  chatIndex: number
+  chats: any
+  setChatIndexFunction: (e: any) => void
+}> = ({ setChatFunction, chatIndex, chats, setChatIndexFunction }) => {
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
-        <HeaderCreateChatButton
-          onClick={() => {
-            localStorage.removeItem("uid")
-            history.push("/sign-in")
-          }}
-        >
+        <HeaderCreateChatButton onClick={() => firebase.auth().signOut()}>
           <div>
             <PlusIcon />
           </div>
@@ -83,20 +29,19 @@ const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
             activeChat={chatIndex}
             onClick={() => {
               setChatFunction(chats[i])
-              setChatIndex(i + 1)
+              setChatIndexFunction(i + 1)
             }}
-            key={chat.name}
+            key={i}
           >
             <ChatImg />
             <ChatInfo>
-              <ChatTitle>{`${getUserName(chat.user)}`}</ChatTitle>
+              <ChatTitle>{chat.user.fullname}</ChatTitle>
               <ChatLastMessage>
-                {chat.messages[chat.messages.length - 1].content.length > 25
-                  ? chat.messages[chat.messages.length - 1].content.substr(
-                      0,
-                      22
-                    ) + "..."
-                  : chat.messages[chat.messages.length - 1].content}
+                {chat.messages.length > 0
+                  ? chat.messages[0].content.length > 25
+                    ? chat.messages[0].content.substr(0, 22) + "..."
+                    : chat.messages[0].content
+                  : "Przywitaj się!"}
               </ChatLastMessage>
             </ChatInfo>
           </Chat>
@@ -107,7 +52,7 @@ const LeftPanel: React.FC<{ setChatFunction: Function }> = ({
 }
 
 const Wrapper = styled.div`
-  width: 18rem;
+  width: 23rem;
   padding: 2rem 1rem 2rem 2rem;
 `
 
@@ -216,7 +161,7 @@ const Chat = styled.div<{ activeChat: number | null }>`
     z-index: -1;
   }
   &:last-child {
-    border-radius: 0 0 2rem 2rem;
+    border-radius: 0 0 2rem 2rem !important;
   }
   &:nth-child(${props => (props.activeChat ? props.activeChat - 1 : -1)}) {
     border-radius: 0 0 2rem 0;

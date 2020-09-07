@@ -1,10 +1,17 @@
-import React from "react"
-import { Router as BrowserRouter, Route } from "react-router-dom"
+import React, { useEffect, useState, useContext } from "react"
+import {
+  Router as BrowserRouter,
+  Route,
+  RouteProps,
+  Redirect,
+} from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
 import history from "./history"
-
-import SignIn from "./components/SignIn"
-import Chats from "./components/Chats"
+import firebase from "./firebase"
+import { AuthContext } from "./auth"
+import SignIn from "./pages/SignIn"
+import Chats from "./pages/Chats"
+import AuthProvider from "./auth"
 
 const GLOBAL_STYLE = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;1,700&display=swap');
@@ -15,17 +22,41 @@ const GLOBAL_STYLE = createGlobalStyle`
   }
 `
 
+const UnprotectedRoute = ({ component: Component, ...rest }: any) => {
+  const { uid } = useContext(AuthContext)
+  return (
+    <Route
+      {...rest}
+      render={(props: any) => {
+        if (!uid) return <Component {...props} />
+        else return <Redirect to='/chat' />
+      }}
+    />
+  )
+}
+
+const ProtectedRoute = ({ component: Component, ...rest }: any) => {
+  const { uid } = useContext(AuthContext)
+  return (
+    <Route
+      {...rest}
+      render={(props: any) => {
+        if (uid) return <Component {...props} />
+        else return <Redirect to='/sign-in' />
+      }}
+    />
+  )
+}
+
 function App() {
   return (
-    <BrowserRouter history={history}>
-      <GLOBAL_STYLE />
-      <Route
-        exact
-        path='/sign-in'
-        component={localStorage.getItem("uid") ? Chats : SignIn}
-      />
-      <Route exact path='/chat' component={Chats} />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter history={history}>
+        <GLOBAL_STYLE />
+        <UnprotectedRoute exact path='/sign-in' component={SignIn} />
+        <ProtectedRoute exact path='/chat' component={Chats} />
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
