@@ -8,43 +8,45 @@ import LeftPanel from "./components/LeftPanel"
 import CenterPanel from "./components/CenterPanel"
 
 import { chatUserTypes, chatTypes } from "../global.types"
-import {REQUEST_STATUS} from "../global.consts"
+import { REQUEST_STATUS } from "../global.consts"
 import LoadingScreen from "../LoadingScreen"
 import CreateChat from "./components/CreateChat"
 
 const Chats: React.FC = () => {
-    const { uid, fullname } = useContext(AuthContext)
+    const { uid } = useContext(AuthContext)
     const [chats, setChats] = useState<chatTypes[]>([])
     const [chatIndex, setChatIndex] = useState<number>(1)
     const [requestStatus, setRequestStatus] = useState<REQUEST_STATUS>(REQUEST_STATUS.NONE)
     const [createChatStatus, setCreateChatStatus] = useState<boolean>(false)
     useEffect(() => {
-        firebase
-            .firestore()
-            .collection("chats")
-            .where("users", "array-contains", { uid, fullname })
-            .onSnapshot(snapshot => {
-                let snapshotChats: chatTypes[] = []
-                snapshot.forEach(chat => {
-                    let snapshotChat = {
-                        user: chat
-                            .data()
-                            .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
-                        messages: chat.data().messages,
-                        id: chat.data().id,
-                    }
-                    snapshotChats.push(snapshotChat)
+        if (uid) {
+            firebase
+                .firestore()
+                .collection("chats")
+                .where("users", "array-contains", { uid })
+                .onSnapshot(snapshot => {
+                    let snapshotChats: chatTypes[] = []
+                    snapshot.forEach(chat => {
+                        let snapshotChat = {
+                            user: chat
+                                .data()
+                                .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
+                            messages: chat.data().messages,
+                            id: chat.data().id,
+                        }
+                        snapshotChats.push(snapshotChat)
+                    })
+                    setChats(snapshotChats)
+                    setRequestStatus(REQUEST_STATUS.SUCCESS)
                 })
-                setChats(snapshotChats)
-                setRequestStatus(REQUEST_STATUS.SUCCESS)
-            })
-    }, [])
+        }
+    }, [uid])
     useEffect(() => {
         if (!chatIndex && chats) {
             setChatIndex(1)
         }
     }, [chats, chatIndex])
-    if(requestStatus !== REQUEST_STATUS.NONE && requestStatus !== REQUEST_STATUS.PENDING) {
+    if (requestStatus !== REQUEST_STATUS.NONE && requestStatus !== REQUEST_STATUS.PENDING) {
         return (
             <Wrapper>
                 <Container filter={createChatStatus}>
@@ -52,15 +54,16 @@ const Chats: React.FC = () => {
                         setChatIndexFunction={(e: number) => setChatIndex(e)}
                         chatIndex={chatIndex}
                         chats={chats}
+                        createChatModalFunction={() => setCreateChatStatus(!createChatStatus)}
                     />
                     <CenterPanel chat={chats[chatIndex - 1]} />
                 </Container>
-                <CreateChat visible={createChatStatus}/>
+                <CreateChat visible={createChatStatus} createChatModalFunction={() => setCreateChatStatus(!createChatStatus)} />
             </Wrapper>
         )
     }
     else {
-        return <LoadingScreen/>
+        return <LoadingScreen />
     }
 }
 
@@ -81,6 +84,7 @@ const Container = styled.div<{ filter: boolean }>`
   position: relative;
   z-index: 0;
   display: flex;
+  transition: .3s;
   filter: blur(${({ filter }) => filter ? '.3rem' : '0'});
 `
 

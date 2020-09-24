@@ -1,31 +1,57 @@
-import React from 'react'
+import React, { useState, useContext } from 'react'
 import styled from 'styled-components'
+import firebase from "../../firebase"
+
+import { AuthContext } from "../../Auth/auth"
 
 type createChatPropsTypes = {
-    visible: boolean
+  visible: boolean
+  createChatModalFunction: () => void
 }
 
-const CreateChat: React.FC<createChatPropsTypes> = ({ visible }) => {
-    return (
-        <Wrapper visible={visible}>
-            <Form>
-                <TextField type='text' placeholder={'Email...'}/>
-                <Button type={'submit'} value={'Invite to chat'}/>
-            </Form>
-        </Wrapper>
-    )
+const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFunction }) => {
+  const { uid, email } = useContext(AuthContext)
+  const [inputEmail, setInputEmail] = useState<null | string>(null)
+  const handleSubmit = (e: any) => {
+    e.preventDefault()
+    firebase.firestore().collection('users').where('email', '==', inputEmail).get().then((snapshot => {
+      if (inputEmail !== email) {
+        if (snapshot.docs[0]) {
+          if (!snapshot.docs[0].data().invites.includes(uid)) {
+            firebase.firestore().collection('users').doc(snapshot.docs[0].id).update({ 'invites': [...snapshot.docs[0].data().invites, uid] })
+          }
+          else alert('Juz zaproszony')
+        }
+        else {
+          alert('Nie ma takiego uzytkownika')
+        }
+      }
+      else alert('Nie możesz zaprosić sam siebie')
+    }))
+  }
+  return (
+    <Wrapper visible={visible}>
+      <Form onSubmit={(e: any) => handleSubmit(e)}>
+        <TextField type='text' placeholder={'Email...'} onInput={(e: any) => setInputEmail(e.target.value)} />
+        <Button type={'submit'} value={'Invite to chat'} />
+      </Form>
+    </Wrapper>
+  )
 }
 
-const Wrapper = styled.div<createChatPropsTypes>`
+const Wrapper = styled.div<{ visible: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: rgba(255,255,255,.4);
-  display: ${({ visible }) => visible ? 'flex' : 'none'};
+  opacity: ${({ visible }) => visible ? '1' : '0'};
+  visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
   justify-content: center;
+  display: flex;
   align-items: center;
+  transition: .3s;
 `
 
 const Form = styled.form`

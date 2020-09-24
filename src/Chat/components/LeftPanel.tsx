@@ -9,11 +9,12 @@ const LeftPanel: React.FC<{
   chatIndex: number
   chats: chatTypes[]
   setChatIndexFunction: (e: number) => void
-}> = ({ chatIndex, chats, setChatIndexFunction }) => {
+  createChatModalFunction: () => void
+}> = ({ chatIndex, chats, setChatIndexFunction, createChatModalFunction }) => {
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
-        <HeaderCreateChatButton onClick={() => firebase.auth().signOut()}>
+        <HeaderCreateChatButton onClick={() => createChatModalFunction()}>
           <div>
             <PlusIcon />
           </div>
@@ -32,7 +33,7 @@ const LeftPanel: React.FC<{
           >
             <ChatImg />
             <ChatInfo>
-              <ChatTitle>{chat.user.fullname}</ChatTitle>
+              <ChatTitle>Tytuł</ChatTitle>
               <ChatLastMessage>
                 {chat.messages.length > 0
                   ? chat.messages[0].content.length > 25

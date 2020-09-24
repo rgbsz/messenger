@@ -1,3 +1,4 @@
+import { firestore } from "firebase"
 import React, { useState } from "react"
 import styled from "styled-components"
 import firebase from "../firebase"
@@ -12,10 +13,15 @@ const SignUp: React.FC = () => {
     const [passwordRepeat, setPasswordRepeat] = useState<passwordTypes>(null)
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if(firstname && lastname && email && password && passwordRepeat) {
-            if(password !== passwordRepeat) alert('Passwords.')
+        if (firstname && lastname && email && password && passwordRepeat) {
+            if (password !== passwordRepeat) alert('Passwords.')
             else {
-                firebase.auth().createUserWithEmailAndPassword(email, password).catch((error) => console.log(error));
+                firebase.auth().createUserWithEmailAndPassword(email, password).then((data) => {
+                    firebase.firestore().collection('users').doc(data.user?.uid).set({
+                        email,
+                        fullname: `${firstname} ${lastname}`
+                    })
+                });
             }
         }
         else {
