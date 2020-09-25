@@ -8,6 +8,7 @@ export const AuthContext = React.createContext<userContextTypes>({
   uid: null,
   email: null,
   fullname: null,
+  invites: null,
   requestStatus: REQUEST_STATUS.NONE
 })
 
@@ -16,25 +17,23 @@ const AuthProvider: React.FC = ({ children }) => {
     uid: null,
     email: null,
     fullname: null,
+    invites: null,
     requestStatus: REQUEST_STATUS.NONE
   })
   useEffect(() => {
-    setUser({ uid: null, email: null, fullname: null, requestStatus: REQUEST_STATUS.PENDING })
+    setUser({ uid: null, email: null, fullname: null, invites: null, requestStatus: REQUEST_STATUS.PENDING })
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        while (true) {
-          const query = firebase
-            .firestore()
-            .collection("users")
-            .doc(user.uid).get()
-          const res = await query
-          if (res.data()) {
-            setUser({ uid: res.id, email: res.data()?.email, fullname: res.data()?.fullname, requestStatus: REQUEST_STATUS.SUCCESS })
-            break
+        firebase.firestore().collection('users').doc(user.uid).onSnapshot((snapshot) => {
+          if (snapshot.data()) {
+            setUser({ uid: snapshot.id, email: snapshot.data()?.email, fullname: snapshot.data()?.fullname, invites: snapshot.data()?.invites, requestStatus: REQUEST_STATUS.SUCCESS })
           }
-        }
-      } else setUser({ uid: null, email: null, fullname: null, requestStatus: REQUEST_STATUS.FAILED })
+        })
+      } else setUser({ uid: null, email: null, fullname: null, invites: null, requestStatus: REQUEST_STATUS.FAILED })
     })
+  }, [])
+  useEffect(() => {
+
   }, [])
   return (
     <AuthContext.Provider value={{ ...user }}>{children}</AuthContext.Provider>

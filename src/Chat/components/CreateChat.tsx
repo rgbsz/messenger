@@ -10,7 +10,7 @@ type createChatPropsTypes = {
 }
 
 const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFunction }) => {
-  const { uid, email } = useContext(AuthContext)
+  const { uid, email, fullname } = useContext(AuthContext)
   const [inputEmail, setInputEmail] = useState<null | string>(null)
   const handleSubmit = (e: any) => {
     e.preventDefault()
@@ -18,7 +18,7 @@ const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFu
       if (inputEmail !== email) {
         if (snapshot.docs[0]) {
           if (!snapshot.docs[0].data().invites.includes(uid)) {
-            firebase.firestore().collection('users').doc(snapshot.docs[0].id).update({ 'invites': [...snapshot.docs[0].data().invites, uid] })
+            firebase.firestore().collection('users').doc(snapshot.docs[0].id).update({ 'invites': [...snapshot.docs[0].data().invites, { uid, fullname }] })
           }
           else alert('Juz zaproszony')
         }
@@ -26,7 +26,7 @@ const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFu
           alert('Nie ma takiego uzytkownika')
         }
       }
-      else alert('Nie możesz zaprosić sam siebie')
+      else alert('Nie możesz zaprosić sam siebie.')
     }))
   }
   return (

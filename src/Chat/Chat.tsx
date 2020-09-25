@@ -13,34 +13,33 @@ import LoadingScreen from "../LoadingScreen"
 import CreateChat from "./components/CreateChat"
 
 const Chats: React.FC = () => {
-    const { uid } = useContext(AuthContext)
+    const { uid, fullname } = useContext(AuthContext)
     const [chats, setChats] = useState<chatTypes[]>([])
     const [chatIndex, setChatIndex] = useState<number>(1)
     const [requestStatus, setRequestStatus] = useState<REQUEST_STATUS>(REQUEST_STATUS.NONE)
     const [createChatStatus, setCreateChatStatus] = useState<boolean>(false)
     useEffect(() => {
-        if (uid) {
-            firebase
-                .firestore()
-                .collection("chats")
-                .where("users", "array-contains", { uid })
-                .onSnapshot(snapshot => {
-                    let snapshotChats: chatTypes[] = []
-                    snapshot.forEach(chat => {
-                        let snapshotChat = {
-                            user: chat
-                                .data()
-                                .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
-                            messages: chat.data().messages,
-                            id: chat.data().id,
-                        }
-                        snapshotChats.push(snapshotChat)
-                    })
-                    setChats(snapshotChats)
-                    setRequestStatus(REQUEST_STATUS.SUCCESS)
+        firebase
+            .firestore()
+            .collection("chats")
+            .where("users", "array-contains", { uid, fullname })
+            .onSnapshot(snapshot => {
+                let snapshotChats: chatTypes[] = []
+                snapshot.forEach(chat => {
+                    console.log(chat.data())
+                    let snapshotChat = {
+                        user: chat
+                            .data()
+                            .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
+                        messages: chat.data().messages,
+                        id: chat.data().id,
+                    }
+                    snapshotChats.push(snapshotChat)
                 })
-        }
-    }, [uid])
+                setChats(snapshotChats)
+                setRequestStatus(REQUEST_STATUS.SUCCESS)
+            })
+    }, [])
     useEffect(() => {
         if (!chatIndex && chats) {
             setChatIndex(1)
@@ -85,7 +84,7 @@ const Container = styled.div<{ filter: boolean }>`
   z-index: 0;
   display: flex;
   transition: .3s;
-  filter: blur(${({ filter }) => filter ? '.3rem' : '0'});
+  filter: blur(${({ filter }) => filter ? '2rem' : '0'});
 `
 
 export default Chats

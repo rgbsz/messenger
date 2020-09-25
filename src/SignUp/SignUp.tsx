@@ -19,7 +19,8 @@ const SignUp: React.FC = () => {
                 firebase.auth().createUserWithEmailAndPassword(email, password).then((data) => {
                     firebase.firestore().collection('users').doc(data.user?.uid).set({
                         email,
-                        fullname: `${firstname} ${lastname}`
+                        fullname: `${firstname} ${lastname}`,
+                        invites: []
                     })
                 });
             }

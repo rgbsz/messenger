@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useContext } from "react"
 import styled from "styled-components"
-import firebase from "../../firebase"
+import firebase from '../../firebase'
+import { AuthContext } from "../../Auth/auth"
 
 import PlusIcon from "../../img/PlusIcon"
 import { chatTypes } from "../../global.types"
+import { inviteTypes } from '../../Auth/auth.types'
 
 const LeftPanel: React.FC<{
   chatIndex: number
@@ -11,6 +13,15 @@ const LeftPanel: React.FC<{
   setChatIndexFunction: (e: number) => void
   createChatModalFunction: () => void
 }> = ({ chatIndex, chats, setChatIndexFunction, createChatModalFunction }) => {
+  const { uid, invites, fullname } = useContext(AuthContext)
+  const handleAccept = (e: any) => {
+    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item) => item.uid !== e.target.dataset.uid) })
+    firebase.firestore().collection('chats').doc(`${uid}_${e.target.dataset.uid}`).set({
+      id: `${uid}_${e.target.dataset.uid}`,
+      messages: [],
+      users: [{ uid, fullname }, { uid: e.target.dataset.uid, fullname: e.target.dataset.fullname }]
+    })
+  }
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
@@ -20,7 +31,10 @@ const LeftPanel: React.FC<{
           </div>
           Create New
         </HeaderCreateChatButton>
-        <SearchBar type='text' placeholder='Search...' />
+        {
+          invites?.map((invite: inviteTypes) => <p data-uid={invite.uid} data-fullname={invite.fullname} onClick={(e) => handleAccept(e)}>{invite.fullname}</p>)
+        }
+        <SearchBar type='text' placeholder='Search...' onClick={() => firebase.auth().signOut()} />
       </Header>
       <Chats>
         {chats.map((chat: chatTypes, i: number) => (
@@ -33,13 +47,13 @@ const LeftPanel: React.FC<{
           >
             <ChatImg />
             <ChatInfo>
-              <ChatTitle>Tytuł</ChatTitle>
+              <ChatTitle>{chat.user.fullname}</ChatTitle>
               <ChatLastMessage>
                 {chat.messages.length > 0
                   ? chat.messages[0].content.length > 25
                     ? chat.messages[0].content.substr(0, 22) + "..."
                     : chat.messages[0].content
-                  : "Przywitajsię!"}
+                  : "Przywitaj się!"}
               </ChatLastMessage>
             </ChatInfo>
           </Chat>

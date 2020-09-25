@@ -8,7 +8,6 @@ import { chatTypes, chatMessageTypes } from "../../global.types"
 
 const CenterPanel: React.FC<{ chat: chatTypes }> = ({ chat }) => {
   const { fullname } = useContext(AuthContext)
-  console.log(fullname)
   const [lineBreaks, setLineBreaks] = useState<number>(0)
   const [messageContent, setMessageContent] = useState<string>("")
 
