@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import {Router as BrowserRouter, Route, Redirect, Switch} from "react-router-dom"
+import { Router as BrowserRouter, Route, Redirect, Switch } from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
 import history from "./history"
 import { AuthContext } from "./Auth/auth"
@@ -7,7 +7,7 @@ import SignIn from "./SignIn/SignIn"
 import Chats from "./Chat/Chat"
 import AuthProvider from "./Auth/auth"
 import { RouteTypes } from "./App.types"
-import {REQUEST_STATUS} from "./global.consts"
+import { REQUEST_STATUS } from "./global.consts"
 import LoadingScreen from "./LoadingScreen"
 import SignUp from "./SignUp/SignUp"
 
@@ -25,7 +25,7 @@ const UnprotectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
         <Route
             {...rest}
             render={(props: any) => {
-                if(requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen/>
+                if (requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen />
                 else if (!uid) return <Component {...props} />
                 else return <Redirect to='/chat' />
             }}
@@ -39,7 +39,7 @@ const ProtectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
         <Route
             {...rest}
             render={(props: any) => {
-                if (requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen/>
+                if (requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen />
                 else if (uid) return <Component {...props} />
                 else return <Redirect to='/sign-in' />
             }}
@@ -56,7 +56,7 @@ function App() {
                     <UnprotectedRoute exact path='/sign-in' component={SignIn} />
                     <UnprotectedRoute exact path='/sign-up' component={SignUp} />
                     <ProtectedRoute exact path='/chat' component={Chats} />
-                    <Route render={() => <Redirect to={'/sign-in'}/>}/>
+                    <Route render={() => <Redirect to={'/sign-in'} />} />
                 </Switch>
             </BrowserRouter>
         </AuthProvider>

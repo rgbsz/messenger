@@ -68,7 +68,24 @@ const Messages = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  padding-bottom: 1rem;
+  padding: 0 1rem 1rem 0;
+  margin-bottom: 1rem;
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.light};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.secondary};
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => theme.colors.light};
+  }
 `
 
 const Message = styled.div<{ own: boolean }>`
