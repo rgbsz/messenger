@@ -3,6 +3,9 @@ import styled from 'styled-components'
 import firebase from "../../firebase"
 
 import { AuthContext } from "../../Auth/auth"
+import { REQUEST_STATUS } from '../../global.consts'
+import LoadingScreen from '../../LoadingScreen'
+import { create } from 'domain'
 
 type createChatPropsTypes = {
   visible: boolean
@@ -10,89 +13,154 @@ type createChatPropsTypes = {
 }
 
 const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFunction }) => {
-  const { uid, email, fullname } = useContext(AuthContext)
+  const { uid, email, fullname, invites } = useContext(AuthContext)
   const [inputEmail, setInputEmail] = useState<null | string>(null)
+  const [requestStatus, setRequestStatus] = useState<{ status: REQUEST_STATUS, message: string }>({ status: REQUEST_STATUS.NONE, message: '' })
   const handleSubmit = (e: any) => {
     e.preventDefault()
-    firebase.firestore().collection('users').where('email', '==', inputEmail).get().then((snapshot => {
-      if (inputEmail !== email) {
-        if (snapshot.docs[0]) {
-          if (!snapshot.docs[0].data().invites.includes(uid)) {
-            firebase.firestore().collection('users').doc(snapshot.docs[0].id).update({ 'invites': [...snapshot.docs[0].data().invites, { uid, fullname }] })
+    setRequestStatus({ status: REQUEST_STATUS.PENDING, message: '' })
+    setTimeout(() => {
+      firebase.firestore().collection('users').where('email', '==', inputEmail).get().then((snapshot => {
+        if (inputEmail !== email) {
+          if (snapshot.docs[0]) {
+            firebase.firestore().collection('chats').doc(`${uid}_${snapshot.docs[0].id}`).get().then((a) => {
+              if (a.data()) setRequestStatus({ status: REQUEST_STATUS.FAILED, message: `Chat with this user already exists.` })
+              else {
+                firebase.firestore().collection('chats').doc(`${snapshot.docs[0].id}_${uid}`).get().then((a) => {
+                  if (a.data()) setRequestStatus({ status: REQUEST_STATUS.FAILED, message: `Chat with this user already exists.` })
+                  else {
+                    if (!snapshot.docs[0].data().invites.some((invite: { uid: string }) => invite.uid === uid)) {
+                      if (invites?.some((invite: { uid: string }) => invite.uid === snapshot.docs[0].id)) {
+                        firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item) => item.uid !== snapshot.docs[0].id) })
+                        firebase.firestore().collection('chats').doc(`${uid}_${snapshot.docs[0].id}`).set({
+                          id: `${uid}_${snapshot.docs[0].id}`,
+                          messages: [],
+                          users: [{ uid, fullname }, { uid: snapshot.docs[0].id, fullname: snapshot.docs[0].data().fullname }]
+                        }).then(() => {
+                          setRequestStatus({ status: REQUEST_STATUS.SUCCESS, message: `` })
+                          createChatModalFunction()
+                        })
+                      }
+                      else {
+                        firebase.firestore().collection('users').doc(snapshot.docs[0].id).update({ 'invites': [...snapshot.docs[0].data().invites, { uid, fullname }] })
+                        setRequestStatus({ status: REQUEST_STATUS.SUCCESS, message: `` })
+                        createChatModalFunction()
+                      }
+                    }
+                    else setRequestStatus({ status: REQUEST_STATUS.FAILED, message: `You've already invited this user.` })
+                  }
+                })
+              }
+            })
+
           }
-          else alert('Juz zaproszony')
+          else {
+            setRequestStatus({ status: REQUEST_STATUS.FAILED, message: `There's no user with provided e-mail address.` })
+          }
         }
-        else {
-          alert('Nie ma takiego uzytkownika')
-        }
-      }
-      else alert('Nie możesz zaprosić sam siebie.')
-    }))
+        else setRequestStatus({ status: REQUEST_STATUS.FAILED, message: `You can't invite yourself!.` })
+      }))
+    }, 1500)
   }
   return (
-    <Wrapper visible={visible}>
-      <Form onSubmit={(e: any) => handleSubmit(e)}>
-        <TextField type='text' placeholder={'Email...'} onInput={(e: any) => setInputEmail(e.target.value)} />
-        <Button type={'submit'} value={'Invite to chat'} />
-      </Form>
+    <Wrapper blur={requestStatus.status === REQUEST_STATUS.PENDING} visible={visible}>
+      <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)}>
+        <LoadingScreen form={true} visible={requestStatus.status === REQUEST_STATUS.PENDING} />
+        <input
+          type='text'
+          placeholder='E-mail address'
+          onInput={(e: any) => setInputEmail(e.target.value)}
+        />
+        <p>{requestStatus.status === REQUEST_STATUS.FAILED && requestStatus.message}</p>
+        <input type='submit' value='Invite to chat' />
+      </form>
+      <div className='overlay' onClick={requestStatus.status !== REQUEST_STATUS.PENDING ? (() => createChatModalFunction()) : (() => { })} />
     </Wrapper>
   )
 }
 
-const Wrapper = styled.div<{ visible: boolean }>`
+const Wrapper = styled.div<{ visible: boolean, blur: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255,255,255,.4);
+  background: rgba(255,255,255,.8);
   opacity: ${({ visible }) => visible ? '1' : '0'};
   visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
   justify-content: center;
   display: flex;
   align-items: center;
   transition: .3s;
-`
-
-const Form = styled.form`
- padding: 2rem;
- background: white;
- position: relative;
- border-radius: 2rem;
- display: flex;
- flex-direction: column;
- &::before {
-    border-radius: inherit;
-    content: "";
+  .overlay {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    left: 0;
-    top: 0;
-    opacity: 0.2;
-    box-shadow: 0 0 1rem ${props => props.theme.colors.primary};
-    z-index: -1;
+    z-index: -2;
   }
-`
-
-const TextField = styled.input`
-  padding: 1rem;
-  border-radius: 2rem;
-  border: none;
-  box-shadow: 0 0 1rem rgba(0,0,0,.2);
-  &:focus {
-    outline: none;
+  form {
+    padding: 4rem;
+    position: relative;
+    border-radius: 2rem;
+    background: ${({ theme }) => theme.colors.light};
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    input[type='text'], input[type='password'] {
+      border: none;
+      padding: 1rem;
+      border-radius: 2rem;
+      background: white;
+      width: 100%;
+      margin-top: 1rem;
+      box-sizing: border-box;
+      box-shadow: 0 0 1rem rgba(0,0,0,.1);
+      &:focus {
+        outline: none;
+      }
+      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      transition: .5s ease-in-out;
+    }
+    p {
+      margin-top: 1rem;
+      color: ${({ theme }) => theme.colors.secondary};
+      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      transition: .5s ease-in-out;
+    }
+    input[type='submit'] {
+      border: none;
+      padding: 1rem;
+      border-radius: 2rem;
+      background: ${({ theme }) => theme.colors.secondary};
+      font-weight: bold;
+      width: 100%;
+      margin-top: 2rem;
+      box-sizing: border-box;
+      box-shadow: 0 0 1rem rgba(0,0,0,.1);
+      color: white;
+      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      transition: .5s ease-in-out;
+      cursor: pointer;
+      &:focus {
+        outline: none;
+      }
+    }
+    &::before {
+      border-radius: inherit;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      opacity: 0.2;
+      box-shadow: 0 0 1rem ${props => props.theme.colors.primary};
+      z-index: -1;
+    }
   }
-`
-
-const Button = styled.input`
-  padding: 1rem;
-  border-radius: 2rem;
-  border: none;
-  background: ${({ theme }) => theme.colors.primary};
-  cursor: pointer;
-  color: white;
-  margin-top: 2rem;
 `
 
 export default CreateChat

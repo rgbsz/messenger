@@ -64,8 +64,20 @@ const LeftPanel: React.FC<{
 }
 
 const Wrapper = styled.div`
-  width: 23rem;
+  width: 26rem;
   padding: 2rem 1rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  &::after {
+    width: calc(100% - 2rem);
+    height: 2rem;
+    background: linear-gradient(0deg, rgba(243,246,255,1) 0%, rgba(243,246,255,0) 100%);
+    content: '';
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+  }
 `
 
 const Header = styled.div<{ activeChat: number | null }>`
@@ -77,6 +89,7 @@ const Header = styled.div<{ activeChat: number | null }>`
         : "2rem 2rem 0 0"
       : "2rem 2rem 0 0"};
   padding: 1rem;
+  margin-right: 3rem;
   position: relative;
   &::before {
     border-radius: inherit;
@@ -148,7 +161,28 @@ const SearchBar = styled.input`
   }
 `
 
-const Chats = styled.div``
+const Chats = styled.div`
+  overflow-y: scroll;
+  fill: 1;
+  padding-right: 2rem;
+  position: relative;
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.colors.light};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.colors.secondary};
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => theme.colors.light};
+  }
+`
 
 const Chat = styled.div<{ activeChat: number | null }>`
   box-sizing: border-box;

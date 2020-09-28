@@ -74,7 +74,7 @@ const SignUp: React.FC = () => {
                 />
                 <p>{requestStatus.status === REQUEST_STATUS.FAILED && requestStatus.message}</p>
                 <input type='submit' value='Sign In' />
-                <Link to='/sign-in'>I dont have account</Link>
+                <StyledLink to='/sign-in' blur={requestStatus.status === REQUEST_STATUS.PENDING}>I dont have account</StyledLink>
             </form>
         </Wrapper>
     )
@@ -137,6 +137,13 @@ const Wrapper = styled.div<{ blur: boolean }>`
       }
     }
   }
+`
+
+const StyledLink = styled(Link) <{ blur: boolean }>`
+  filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+  transition: .5s ease-in-out;
+  font-size: .8rem;
+  margin-top: .5rem;
 `
 
 export default SignUp

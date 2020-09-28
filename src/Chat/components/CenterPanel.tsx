@@ -89,6 +89,7 @@ const Messages = styled.div`
 `
 
 const Message = styled.div<{ own: boolean }>`
+  whitespace: pre-line;
   background: ${({ own, theme }) => (own ? theme.colors.secondary : "white")};
   align-self: ${({ own }) => (own ? "flex-end" : "flex-start")};
   position: relative;

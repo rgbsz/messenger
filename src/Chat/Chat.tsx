@@ -26,7 +26,6 @@ const Chats: React.FC = () => {
             .onSnapshot(snapshot => {
                 let snapshotChats: chatTypes[] = []
                 snapshot.forEach(chat => {
-                    console.log(chat.data())
                     let snapshotChat = {
                         user: chat
                             .data()
@@ -84,7 +83,7 @@ const Container = styled.div<{ filter: boolean }>`
   z-index: 0;
   display: flex;
   transition: .3s;
-  filter: blur(${({ filter }) => filter ? '2rem' : '0'});
+  filter: blur(${({ filter }) => filter ? '4rem' : '0'});
 `
 
 export default Chats
