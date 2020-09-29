@@ -24,9 +24,10 @@ const AuthProvider: React.FC = ({ children }) => {
     setUser({ uid: null, email: null, fullname: null, invites: null, requestStatus: REQUEST_STATUS.PENDING })
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        firebase.firestore().collection('users').doc(user.uid).onSnapshot((snapshot) => {
-          if (snapshot.data()) {
-            setUser({ uid: snapshot.id, email: snapshot.data()?.email, fullname: snapshot.data()?.fullname, invites: snapshot.data()?.invites, requestStatus: REQUEST_STATUS.SUCCESS })
+        firebase.firestore().collection('users').doc(user.uid).get().then((user) => {
+          if (user.data()) {
+            console.log(user.data())
+            setUser({ uid: user.id, email: user.data()?.email, fullname: user.data()?.fullname, invites: user.data()?.invites, requestStatus: REQUEST_STATUS.SUCCESS })
           }
         })
       } else setUser({ uid: null, email: null, fullname: null, invites: null, requestStatus: REQUEST_STATUS.FAILED })

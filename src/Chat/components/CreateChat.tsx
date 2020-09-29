@@ -5,7 +5,6 @@ import firebase from "../../firebase"
 import { AuthContext } from "../../Auth/auth"
 import { REQUEST_STATUS } from '../../global.consts'
 import LoadingScreen from '../../LoadingScreen'
-import { create } from 'domain'
 
 type createChatPropsTypes = {
   visible: boolean

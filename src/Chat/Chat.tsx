@@ -19,26 +19,28 @@ const Chats: React.FC = () => {
     const [requestStatus, setRequestStatus] = useState<REQUEST_STATUS>(REQUEST_STATUS.NONE)
     const [createChatStatus, setCreateChatStatus] = useState<boolean>(false)
     useEffect(() => {
-        firebase
-            .firestore()
-            .collection("chats")
-            .where("users", "array-contains", { uid, fullname })
-            .onSnapshot(snapshot => {
-                let snapshotChats: chatTypes[] = []
-                snapshot.forEach(chat => {
-                    let snapshotChat = {
-                        user: chat
-                            .data()
-                            .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
-                        messages: chat.data().messages,
-                        id: chat.data().id,
-                    }
-                    snapshotChats.push(snapshotChat)
+        if (uid) {
+            firebase
+                .firestore()
+                .collection("chats")
+                .where("users", "array-contains", { uid, fullname })
+                .onSnapshot(snapshot => {
+                    let snapshotChats: chatTypes[] = []
+                    snapshot.forEach(chat => {
+                        let snapshotChat = {
+                            user: chat
+                                .data()
+                                .users.filter((user: chatUserTypes) => user.uid !== uid)[0],
+                            messages: chat.data().messages,
+                            id: chat.data().id,
+                        }
+                        snapshotChats.push(snapshotChat)
+                    })
+                    setChats(snapshotChats)
+                    setRequestStatus(REQUEST_STATUS.SUCCESS)
                 })
-                setChats(snapshotChats)
-                setRequestStatus(REQUEST_STATUS.SUCCESS)
-            })
-    }, [])
+        }
+    }, [uid])
     useEffect(() => {
         if (!chatIndex && chats) {
             setChatIndex(1)
@@ -47,7 +49,7 @@ const Chats: React.FC = () => {
     if (requestStatus !== REQUEST_STATUS.NONE && requestStatus !== REQUEST_STATUS.PENDING) {
         return (
             <Wrapper>
-                <Container filter={createChatStatus}>
+                <Container filterProp={createChatStatus}>
                     <LeftPanel
                         setChatIndexFunction={(e: number) => setChatIndex(e)}
                         chatIndex={chatIndex}
@@ -74,7 +76,7 @@ const Wrapper = styled.div`
   box-sizing: border-box;
 `
 
-const Container = styled.div<{ filter: boolean }>`
+const Container = styled.div<{ filterProp: boolean }>`
   width: 100%;
   height: 100%;
   background: ${props => props.theme.colors.light};
@@ -83,7 +85,7 @@ const Container = styled.div<{ filter: boolean }>`
   z-index: 0;
   display: flex;
   transition: .3s;
-  filter: blur(${({ filter }) => filter ? '4rem' : '0'});
+  filter: blur(${({ filterProp }) => filterProp ? '4rem' : '0'});
 `
 
 export default Chats

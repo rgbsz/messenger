@@ -8,7 +8,7 @@ type propTypes = {
 
 const LoadingScreen: React.FC<propTypes> = ({ visible = true, form = false }) => {
     return (
-        <Wrapper visibility={visible} form={form}><div /></Wrapper>
+        <Wrapper visibilityProp={visible} formProp={form ? true : false}><div /></Wrapper>
     )
 }
 
@@ -21,14 +21,14 @@ const Keyframes = keyframes`
     }
 `
 
-const Wrapper = styled.div<{ visibility: boolean, form: boolean }>`
+const Wrapper = styled.div<{ visibilityProp: boolean, formProp: boolean }>`
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: ${({ form }) => form ? '100%' : '100vh'};
-    opacity: ${({ visibility }) => visibility ? '1' : '0'};
-    visibility: ${({ visibility }) => visibility ? 'visible' : 'hidden'};
+    height: ${({ formProp }) => formProp ? '100%' : '100vh'};
+    opacity: ${({ visibilityProp }) => visibilityProp ? '1' : '0'};
+    visibility: ${({ visibilityProp }) => visibilityProp ? 'visible' : 'hidden'};
     transition: .3s;
     display: flex;
     justify-content: center;

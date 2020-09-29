@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useState, useEffect } from "react"
 import styled from "styled-components"
 import firebase from '../../firebase'
 import { AuthContext } from "../../Auth/auth"
@@ -13,15 +13,23 @@ const LeftPanel: React.FC<{
   setChatIndexFunction: (e: number) => void
   createChatModalFunction: () => void
 }> = ({ chatIndex, chats, setChatIndexFunction, createChatModalFunction }) => {
-  const { uid, invites, fullname } = useContext(AuthContext)
+  const { uid, fullname } = useContext(AuthContext)
+  const [invites, setInvites] = useState<any>(null)
   const handleAccept = (e: any) => {
-    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item) => item.uid !== e.target.dataset.uid) })
+    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item: any) => item.uid !== e.target.dataset.uid) })
     firebase.firestore().collection('chats').doc(`${uid}_${e.target.dataset.uid}`).set({
       id: `${uid}_${e.target.dataset.uid}`,
       messages: [],
       users: [{ uid, fullname }, { uid: e.target.dataset.uid, fullname: e.target.dataset.fullname }]
     })
   }
+  useEffect(() => {
+    if (uid) {
+      firebase.firestore().collection('users').doc(uid).onSnapshot(user => {
+        setInvites(user.data()?.invites)
+      })
+    }
+  }, [uid])
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
@@ -32,7 +40,7 @@ const LeftPanel: React.FC<{
           Create New
         </HeaderCreateChatButton>
         {
-          invites?.map((invite: inviteTypes) => <p data-uid={invite.uid} data-fullname={invite.fullname} onClick={(e) => handleAccept(e)}>{invite.fullname}</p>)
+          invites?.map((invite: inviteTypes) => <p key={invite.uid} data-uid={invite.uid} data-fullname={invite.fullname} onClick={(e) => handleAccept(e)}>{invite.fullname}</p>)
         }
         <SearchBar type='text' placeholder='Search...' onClick={() => firebase.auth().signOut()} />
       </Header>

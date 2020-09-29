@@ -19,7 +19,7 @@ const SignIn: React.FC = () => {
     }, 1500)
   }
   return (
-    <Wrapper blur={requestStatus === REQUEST_STATUS.PENDING}>
+    <Wrapper isBlurred={requestStatus === REQUEST_STATUS.PENDING}>
       <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => handleSubmit(e)}>
         <LoadingScreen form={true} visible={requestStatus === REQUEST_STATUS.PENDING} />
         <input
@@ -38,13 +38,13 @@ const SignIn: React.FC = () => {
         />
         <p>{requestStatus === REQUEST_STATUS.FAILED && 'Wrong e-mail or password.'}</p>
         <input type='submit' value='Sign In' />
-        <StyledLink to='/sign-up' blur={requestStatus === REQUEST_STATUS.PENDING}>I already have an account</StyledLink>
+        <StyledLink to='/sign-up' blurprop={requestStatus === REQUEST_STATUS.PENDING}>I already have an account</StyledLink>
       </form>
     </Wrapper>
   )
 }
 
-const Wrapper = styled.div<{ blur: boolean }>`
+const Wrapper = styled.div<{ isBlurred: boolean }>`
   width: 100%;
   height: 100vh;
   display: flex;
@@ -73,13 +73,13 @@ const Wrapper = styled.div<{ blur: boolean }>`
       &:focus {
         outline: none;
       }
-      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      filter: ${({ isBlurred }) => isBlurred ? 'blur(3rem)' : 'blur(0)'};
       transition: .5s ease-in-out;
     }
     p {
       margin-top: 1rem;
       color: ${({ theme }) => theme.colors.secondary};
-      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      filter: ${({ isBlurred }) => isBlurred ? 'blur(3rem)' : 'blur(0)'};
       transition: .5s ease-in-out;
     }
     input[type='submit'] {
@@ -93,7 +93,7 @@ const Wrapper = styled.div<{ blur: boolean }>`
       box-sizing: border-box;
       box-shadow: 0 0 1rem rgba(0,0,0,.1);
       color: white;
-      filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+      filter: ${({ isBlurred }) => isBlurred ? 'blur(3rem)' : 'blur(0)'};
       transition: .5s ease-in-out;
       cursor: pointer;
       &:focus {
@@ -103,8 +103,8 @@ const Wrapper = styled.div<{ blur: boolean }>`
   }
 `
 
-const StyledLink = styled(Link) <{ blur: boolean }>`
-  filter: ${({ blur }) => blur ? 'blur(3rem)' : 'blur(0)'};
+const StyledLink = styled(Link) <{ blurprop: boolean }>`
+  filter: ${({ blurprop }) => blurprop ? 'blur(3rem)' : 'blur(0)'};
   transition: .5s ease-in-out;
   font-size: .8rem;
   margin-top: .5rem;
