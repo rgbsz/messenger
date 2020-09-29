@@ -41,7 +41,7 @@ const Chats: React.FC = () => {
                     setRequestStatus(REQUEST_STATUS.SUCCESS)
                 })
         }
-    }, [uid])
+    }, [uid, fullname])
     useEffect(() => {
         if (!chatIndex && chats) {
             setChatIndex(1)
