@@ -11,7 +11,7 @@ const CenterPanel: React.FC<{ chat: chatTypes }> = ({ chat }) => {
   const [lineBreaks, setLineBreaks] = useState<number>(0)
   const [messageContent, setMessageContent] = useState<string>("")
 
-  const HandleTextArea = (e: any) => {
+  const HandleTextArea = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       if (messageContent.trim()) {
@@ -41,11 +41,11 @@ const CenterPanel: React.FC<{ chat: chatTypes }> = ({ chat }) => {
       </Messages>
       <Controls>
         <textarea
-          onKeyPress={e => HandleTextArea(e)}
+          onKeyPress={(e: React.KeyboardEvent<HTMLTextAreaElement>) => HandleTextArea(e)}
           rows={lineBreaks + 1}
-          onInput={(e: any) => {
-            setLineBreaks((e.target.value.match(/\n/g) || []).length)
-            setMessageContent(e.target.value)
+          onInput={(e: React.FormEvent<HTMLTextAreaElement>) => {
+            setLineBreaks((e.currentTarget.value.match(/\n/g) || []).length)
+            setMessageContent(e.currentTarget.value)
           }}
         ></textarea>
       </Controls>

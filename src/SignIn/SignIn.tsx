@@ -38,7 +38,7 @@ const SignIn: React.FC = () => {
         />
         <p>{requestStatus === REQUEST_STATUS.FAILED && 'Wrong e-mail or password.'}</p>
         <input type='submit' value='Sign In' />
-        <StyledLink to='/sign-up' blurprop={requestStatus === REQUEST_STATUS.PENDING}>I already have an account</StyledLink>
+        <StyledLink to='/sign-up' blurprop={requestStatus === REQUEST_STATUS.PENDING}>I dont have an account</StyledLink>
       </form>
     </Wrapper>
   )

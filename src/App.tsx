@@ -1,5 +1,5 @@
 import React, { useContext } from "react"
-import { Router as BrowserRouter, Route, Redirect, Switch } from "react-router-dom"
+import { Router as BrowserRouter, Route, Redirect, Switch, RouteProps } from "react-router-dom"
 import { createGlobalStyle } from "styled-components"
 import history from "./history"
 import { AuthContext } from "./Auth/auth"
@@ -24,7 +24,7 @@ const UnprotectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
     return (
         <Route
             {...rest}
-            render={(props: any) => {
+            render={(props: RouteProps) => {
                 if (requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen />
                 else if (!uid) return <Component {...props} />
                 else return <Redirect to='/chat' />
@@ -38,7 +38,7 @@ const ProtectedRoute = ({ component: Component, ...rest }: RouteTypes) => {
     return (
         <Route
             {...rest}
-            render={(props: any) => {
+            render={(props: RouteProps) => {
                 if (requestStatus === REQUEST_STATUS.PENDING || requestStatus === REQUEST_STATUS.NONE) return <LoadingScreen />
                 else if (uid) return <Component {...props} />
                 else return <Redirect to='/sign-in' />

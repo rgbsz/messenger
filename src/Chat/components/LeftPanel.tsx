@@ -12,24 +12,20 @@ const LeftPanel: React.FC<{
   chats: chatTypes[]
   setChatIndexFunction: (e: number) => void
   createChatModalFunction: () => void
-}> = ({ chatIndex, chats, setChatIndexFunction, createChatModalFunction }) => {
+  invites: inviteTypes[]
+}> = ({ chatIndex, chats, setChatIndexFunction, createChatModalFunction, invites }) => {
   const { uid, fullname } = useContext(AuthContext)
-  const [invites, setInvites] = useState<any>(null)
-  const handleAccept = (e: any) => {
-    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item: any) => item.uid !== e.target.dataset.uid) })
-    firebase.firestore().collection('chats').doc(`${uid}_${e.target.dataset.uid}`).set({
-      id: `${uid}_${e.target.dataset.uid}`,
+  const handleAccept = (e: React.MouseEvent<HTMLSpanElement>) => {
+    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item: inviteTypes) => item.uid !== e.currentTarget.dataset.uid) })
+    firebase.firestore().collection('chats').doc(`${uid}_${e.currentTarget.dataset.uid}`).set({
+      id: `${uid}_${e.currentTarget.dataset.uid}`,
       messages: [],
-      users: [{ uid, fullname }, { uid: e.target.dataset.uid, fullname: e.target.dataset.fullname }]
+      users: [{ uid, fullname }, { uid: e.currentTarget.dataset.uid, fullname: e.currentTarget.dataset.fullname }]
     })
   }
-  useEffect(() => {
-    if (uid) {
-      firebase.firestore().collection('users').doc(uid).onSnapshot(user => {
-        setInvites(user.data()?.invites)
-      })
-    }
-  }, [uid])
+  const handleDecline = (e: React.MouseEvent<HTMLSpanElement>) => {
+    firebase.firestore().collection('users').doc(`${uid}`).update({ 'invites': invites?.filter((item: inviteTypes) => item.uid !== e.currentTarget.dataset.uid) })
+  }
   return (
     <Wrapper>
       <Header activeChat={chatIndex}>
@@ -40,9 +36,9 @@ const LeftPanel: React.FC<{
           Create New
         </HeaderCreateChatButton>
         {
-          invites?.map((invite: inviteTypes) => <p key={invite.uid} data-uid={invite.uid} data-fullname={invite.fullname} onClick={(e) => handleAccept(e)}>{invite.fullname}</p>)
+          invites?.map((invite: inviteTypes) => <p key={invite.uid}>{invite.fullname} - <span data-uid={invite.uid} data-fullname={invite.fullname} onClick={(e) => handleAccept(e)}>Akceptuj</span> | <span data-uid={invite.uid} onClick={(e: React.MouseEvent<HTMLSpanElement>) => handleDecline(e)}>Odrzuć</span></p>)
         }
-        <SearchBar type='text' placeholder='Search...' onClick={() => firebase.auth().signOut()} />
+        <p><span onClick={() => firebase.auth().signOut()}>Sign Out</span></p>
       </Header>
       <Chats>
         {chats.map((chat: chatTypes, i: number) => (
@@ -53,7 +49,6 @@ const LeftPanel: React.FC<{
             }}
             key={i}
           >
-            <ChatImg />
             <ChatInfo>
               <ChatTitle>{chat.user.fullname}</ChatTitle>
               <ChatLastMessage>
@@ -61,7 +56,7 @@ const LeftPanel: React.FC<{
                   ? chat.messages[0].content.length > 25
                     ? chat.messages[0].content.substr(0, 22) + "..."
                     : chat.messages[0].content
-                  : "Przywitaj się!"}
+                  : "Say hello!"}
               </ChatLastMessage>
             </ChatInfo>
           </Chat>
@@ -97,8 +92,20 @@ const Header = styled.div<{ activeChat: number | null }>`
         : "2rem 2rem 0 0"
       : "2rem 2rem 0 0"};
   padding: 1rem;
-  margin-right: 3rem;
   position: relative;
+  p {
+    width: 100%;
+    font-size: .8rem;
+    text-align: center;
+    span {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    margin-top: .2rem;
+    &:first-of-type {
+      margin-top: 1rem;
+    }
+  }
   &::before {
     border-radius: inherit;
     content: "";
@@ -156,23 +163,8 @@ const HeaderCreateChatButton = styled.button`
   }
 `
 
-const SearchBar = styled.input`
-  border: none;
-  padding: 1rem;
-  border-radius: 2rem;
-  background: ${props => props.theme.colors.light};
-  width: 100%;
-  margin-top: 1.5rem;
-  box-sizing: border-box;
-  &:focus {
-    outline: none;
-  }
-`
-
 const Chats = styled.div`
-  overflow-y: scroll;
   fill: 1;
-  padding-right: 2rem;
   position: relative;
   ::-webkit-scrollbar {
     width: 5px;
@@ -231,14 +223,6 @@ const Chat = styled.div<{ activeChat: number | null }>`
   &:nth-child(${props => (props.activeChat ? props.activeChat + 1 : -1)}) {
     border-radius: 0 2rem 0 0;
   }
-`
-
-const ChatImg = styled.div`
-  min-width: 3rem;
-  min-height: 3rem;
-  background: url("https://www.commondreams.org/sites/default/files/views-article/elonmusk.jpeg") center;
-  background-size: cover;
-  border-radius: 50%;
 `
 
 const ChatInfo = styled.div`

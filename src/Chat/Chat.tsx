@@ -18,6 +18,7 @@ const Chats: React.FC = () => {
     const [chatIndex, setChatIndex] = useState<number>(1)
     const [requestStatus, setRequestStatus] = useState<REQUEST_STATUS>(REQUEST_STATUS.NONE)
     const [createChatStatus, setCreateChatStatus] = useState<boolean>(false)
+    const [invites, setInvites] = useState<any>([])
     useEffect(() => {
         if (uid) {
             firebase
@@ -46,11 +47,19 @@ const Chats: React.FC = () => {
             setChatIndex(1)
         }
     }, [chats, chatIndex])
+    useEffect(() => {
+        if (uid) {
+            firebase.firestore().collection('users').doc(uid).onSnapshot(user => {
+                setInvites(user.data()?.invites)
+            })
+        }
+    }, [uid])
     if (requestStatus !== REQUEST_STATUS.NONE && requestStatus !== REQUEST_STATUS.PENDING) {
         return (
             <Wrapper>
                 <Container filterProp={createChatStatus}>
                     <LeftPanel
+                        invites={invites}
                         setChatIndexFunction={(e: number) => setChatIndex(e)}
                         chatIndex={chatIndex}
                         chats={chats}
@@ -58,7 +67,7 @@ const Chats: React.FC = () => {
                     />
                     <CenterPanel chat={chats[chatIndex - 1]} />
                 </Container>
-                <CreateChat visible={createChatStatus} createChatModalFunction={() => setCreateChatStatus(!createChatStatus)} />
+                <CreateChat invites={invites} visible={createChatStatus} createChatModalFunction={() => setCreateChatStatus(!createChatStatus)} />
             </Wrapper>
         )
     }

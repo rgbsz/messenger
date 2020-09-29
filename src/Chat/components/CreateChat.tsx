@@ -6,16 +6,22 @@ import { AuthContext } from "../../Auth/auth"
 import { REQUEST_STATUS } from '../../global.consts'
 import LoadingScreen from '../../LoadingScreen'
 
+type inviteProps = {
+  uid: string,
+  fullname: string
+}
+
 type createChatPropsTypes = {
   visible: boolean
   createChatModalFunction: () => void
+  invites: inviteProps[]
 }
 
-const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFunction }) => {
-  const { uid, email, fullname, invites } = useContext(AuthContext)
+const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFunction, invites }) => {
+  const { uid, email, fullname } = useContext(AuthContext)
   const [inputEmail, setInputEmail] = useState<null | string>(null)
   const [requestStatus, setRequestStatus] = useState<{ status: REQUEST_STATUS, message: string }>({ status: REQUEST_STATUS.NONE, message: '' })
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setRequestStatus({ status: REQUEST_STATUS.PENDING, message: '' })
     setTimeout(() => {
@@ -68,7 +74,7 @@ const CreateChat: React.FC<createChatPropsTypes> = ({ visible, createChatModalFu
         <input
           type='text'
           placeholder='E-mail address'
-          onInput={(e: any) => setInputEmail(e.target.value)}
+          onInput={(e: React.FormEvent<HTMLInputElement>) => setInputEmail(e.currentTarget.value)}
         />
         <p>{requestStatus.status === REQUEST_STATUS.FAILED && requestStatus.message}</p>
         <input type='submit' value='Invite to chat' />

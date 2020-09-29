@@ -73,8 +73,9 @@ const SignUp: React.FC = () => {
                     }
                 />
                 <p>{requestStatus.status === REQUEST_STATUS.FAILED && requestStatus.message}</p>
+                <p>Note: you can use dummy data like haha@xd.com</p>
                 <input type='submit' value='Sign In' />
-                <StyledLink to='/sign-in' blur={requestStatus.status === REQUEST_STATUS.PENDING}>I dont have account</StyledLink>
+                <StyledLink to='/sign-in' blur={requestStatus.status === REQUEST_STATUS.PENDING}>I already have an account</StyledLink>
             </form>
         </Wrapper>
     )
