@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react"
+import React, { useContext } from "react"
 import styled from "styled-components"
 import firebase from '../../firebase'
 import { AuthContext } from "../../Auth/auth"
